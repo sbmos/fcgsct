@@ -1,0 +1,13 @@
+package Test {
+	
+	component RobotArm with statechart -> RobotArm {
+		port control provides org.franca.examples.RobotArm {
+			move -> control.move
+			move -> control.replyMove
+			grab -> control.grab
+			grab -> control.replyGrab
+			release -> control.release
+			release -> control.replyRelease
+		}
+	}
+}
