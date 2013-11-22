@@ -35,11 +35,11 @@ public class PATest {
 		XtextResourceSet resourceSet = injector.getInstance(XtextResourceSet.class);
 		resourceSet.addLoadOption(XtextResource.OPTION_RESOLVE_ALL, Boolean.TRUE);
 		Resource resource = resourceSet.getResource(
-			    URI.createURI("file://Users/braunstein/Workspaces/franca_sct_contract_evaluation/de.itemis.protocolanalysis.example/Test.ycm"), true);
+			    URI.createURI("file://Users/braunstein/git/fcgsct/de.itemis.protocolanalysis.example/Test.ycm"), true);
 		Resource resource2 = resourceSet.getResource(
-			    URI.createURI("file://Users/braunstein/Workspaces/franca_sct_contract_evaluation/de.itemis.protocolanalysis.example/robotarm.fidl"), true);
+			    URI.createURI("file://Users/braunstein/git/fcgsct/de.itemis.protocolanalysis.example/robotarm.fidl"), true);
 		Resource resource3 = resourceSet.getResource(
-			    URI.createURI("file://Users/braunstein/Workspaces/franca_sct_contract_evaluation/de.itemis.protocolanalysis.example/RobotArm.sct"), true);
+			    URI.createURI("file://Users/braunstein/git/fcgsct/de.itemis.protocolanalysis.example/RobotArm.sct"), true);
 		model = (ComponentModel) resource.getContents().get(0);
 	}
 	
