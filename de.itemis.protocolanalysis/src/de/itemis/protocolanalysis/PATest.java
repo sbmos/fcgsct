@@ -29,7 +29,11 @@ public class PATest {
 	ComponentModel model;
 	
 	@Before
-	public void setup() {
+	/**
+	 * Basic setup. Loads models from example files into one common resource set.
+	 * CoMo is used as glue and link to Franca and SCT
+	 */
+	public void setupModels() {
 //		new org.eclipse.emf.mwe.utils.StandaloneSetup().setPlatformUri("../");
 		Injector injector = new ComoStandaloneSetup().createInjectorAndDoEMFRegistration();
 		XtextResourceSet resourceSet = injector.getInstance(XtextResourceSet.class);
@@ -41,38 +45,57 @@ public class PATest {
 		Resource resource3 = resourceSet.getResource(
 			    URI.createURI("file://Users/braunstein/git/fcgsct/de.itemis.protocolanalysis.example/RobotArm.sct"), true);
 		model = (ComponentModel) resource.getContents().get(0);
+		
+		assertNotNull("Component model couldn't be loaded and is null", model);
 	}
 	
 	@Test
-	public void test() {
-		assertNotNull(model);
+	/**
+	 * Test if the component model is loaded and if proxies for Franca and SCT are resolved correctly,
+	 * meaning if they are accessible through CoMo
+	 */
+	public void modelsLoaded() {
 		
 		EList<Definition> definitions = model.getPackage().getDefinitions();
 		
-		for (Definition definition : definitions) {
-			if (definition instanceof Component) {
-				Component component = (Component) definition;
-				ComponentMapping componentMapping = component.getComponentMapping();
-				if (componentMapping instanceof ExternalModelMapping) {
-					ExternalModelMapping externalModelMapping = (ExternalModelMapping) componentMapping;
-					RefValue value = externalModelMapping.getValue();
-					if (value.getValue() instanceof Statechart) {
-						Statechart statechart = (Statechart) value.getValue();
-						System.out.println(EmfFormatter.objToStr(statechart));
-					}
-					
+		assertTrue("No defintions found", !definitions.isEmpty());
+		
+		Statechart aStatechart = null;
+		FInterface aFInterface = null;
+		
+//		for (Definition definition : definitions) {
+		Definition definition = definitions.get(0);
+		if (definition instanceof Component) {
+			Component component = (Component) definition;
+			ComponentMapping componentMapping = component.getComponentMapping();
+			if (componentMapping instanceof ExternalModelMapping) {
+				ExternalModelMapping externalModelMapping = (ExternalModelMapping) componentMapping;
+				RefValue value = externalModelMapping.getValue();
+				if (value.getValue() instanceof Statechart) {
+					aStatechart = (Statechart) value.getValue();
+					// System.out.println(EmfFormatter.objToStr(statechart));
 				}
-				
-				for (Port port : component.getPorts()) {
-					if (port.getPortMapping() instanceof InterfaceMapping) {
-						InterfaceMapping interfaceMapping = (InterfaceMapping) port.getPortMapping();
-						FInterface fInterface = interfaceMapping.getInterface();
-						System.out.println("### " + port.getName() + ": " + fInterface.getName());
-						System.out.println(EmfFormatter.objToStr(fInterface));
-					}
+
+			}
+
+			for (Port port : component.getPorts()) {
+				if (port.getPortMapping() instanceof InterfaceMapping) {
+					InterfaceMapping interfaceMapping = (InterfaceMapping) port
+							.getPortMapping();
+					aFInterface = interfaceMapping.getInterface();
+					break;
+					// System.out.println("### " + port.getName() + ": " +
+					// fInterface.getName());
+					// System.out.println(EmfFormatter.objToStr(fInterface));
 				}
 			}
 		}
+		
+		assertNotNull("Couldn't find statechart model", aStatechart);
+		assertNotNull("Couldn't find Franca model", aFInterface);
+		
+		assertEquals("Couldn't resolve statechart model", "RobotArm", aStatechart.getName());
+		assertEquals("Couldn't resolve Franca model", "RobotArm", aFInterface.getName());
 	}
 
 }
