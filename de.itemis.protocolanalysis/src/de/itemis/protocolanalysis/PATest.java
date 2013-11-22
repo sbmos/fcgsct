@@ -119,21 +119,29 @@ public class PATest {
 			}
 		}
 		assertNotNull(entry);
-		Set<Vertex> trace = new HashSet<Vertex>();
-		traverse(entry.getOutgoingTransitions(), trace);
+		Set<Transition> trace = new HashSet<Transition>();
+		traverse(entry.getOutgoingTransitions(), trace, 0);
 	}
 	
-	private void traverse(EList<Transition> transitions, Set<Vertex> trace) {
+	private String getIndent (int depth) {
+		String indent = "";
+		for (int i = depth; i > 0; i--) {
+			indent += "\t";
+		}
+		return indent;
+	}
+	
+	private void traverse(EList<Transition> transitions, Set<Transition> trace, int depth) {
 		for (Transition transition : transitions) {
 			
 			Vertex source = transition.getSource();
 			Vertex target = transition.getTarget();
 			
-			if (!trace.contains(source)) {
-				System.out.println(source.getName() + " -- [" + transition.getSpecification() + "] --> " + target.getName());
-				Set<Vertex> fork = new HashSet<>(trace);
-				fork.add(source);
-				traverse(target.getOutgoingTransitions(), trace);
+			if (!trace.contains(transition)) {
+				System.out.println(getIndent(depth) + source.getName() + " -- [" + transition.getSpecification() + "] --> " + target.getName());
+				Set<Transition> fork = new HashSet<Transition>(trace);
+				fork.add(transition);
+				traverse(target.getOutgoingTransitions(), fork, depth + 1);
 			}
 		}
 	}
