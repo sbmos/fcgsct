@@ -22,14 +22,16 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.etrice.core.genmodel.etricegen.ExpandedActorClass;
 import org.eclipse.etrice.core.room.GeneralProtocolClass;
 import org.eclipse.etrice.core.room.InSemanticsRule;
-import org.eclipse.etrice.core.room.InterfaceItem;
 import org.eclipse.etrice.core.room.ProtocolClass;
 import org.eclipse.etrice.core.room.ProtocolSemantics;
-import org.eclipse.etrice.core.room.SemanticsRule;
 import org.eclipse.etrice.core.room.util.RoomHelpers;
+import org.franca.core.franca.FTransition; //was SemanticsRule
+import org.yakindu.sct.model.stext.stext.InterfaceScope; //was InterfaceItem
+
+import de.itemis.protocolanalysis.Activator;
 
 public class ActiveRules {
-	private HashMap<InterfaceItem, List<SemanticsRule>> rules;
+	private HashMap<InterfaceScope, List<FTransition>> rules;
 	private static boolean traceRules = false;
 	private static int traceLevel = 0;
 	static {
@@ -51,18 +53,18 @@ public class ActiveRules {
 	private static final int TRACE_DETAILS = 2;
 
 	public ActiveRules() {
-		rules = new HashMap<InterfaceItem, List<SemanticsRule>>();
+		rules = new HashMap<InterfaceScope, List<FTransition>>();
 	}
 
-	private ActiveRules(HashMap<InterfaceItem, List<SemanticsRule>> r) {
+	private ActiveRules(HashMap<InterfaceScope, List<FTransition>> r) {
 		rules = r;
 	}
 
-	public Set<InterfaceItem> getPortList() {
+	public Set<InterfaceScope> getPortList() {
 		return rules.keySet();
 	}
 
-	public List<SemanticsRule> getRulesForPort(InterfaceItem port) {
+	public List<FTransition> getRulesForPort(InterfaceScope port) {
 		return rules.get(port);
 	}
 
@@ -71,10 +73,11 @@ public class ActiveRules {
 	public List<HandledMessage> consumeMessages(List<HandledMessage> msgList) {
 		List<HandledMessage> wrongMsgList = new ArrayList<HandledMessage>();
 		for (HandledMessage msg : msgList) {
-			List<SemanticsRule> localRules = rules.get(msg.getIfitem());
+			List<FTransition> localRules = rules.get(msg.getIfitem());
 			if (localRules != null) {
-				SemanticsRule match = null;
-				for (SemanticsRule rule : localRules) {
+				FTransition match = null;
+				for (FTransition rule : localRules) {
+//					rule.getTrigger().getEvent().get
 					if (rule.getMsg() == msg.getMsg()) {
 						match = rule;
 						break;
@@ -112,17 +115,17 @@ public class ActiveRules {
 	// merges the rules with the destination active rules
 	public boolean merge(ActiveRules ar) {
 		boolean added_at_least_one = false;
-		for (Entry<InterfaceItem, List<SemanticsRule>> entry : ar.rules
+		for (Entry<InterfaceScope, List<FTransition>> entry : ar.rules
 				.entrySet()) {
-			for (SemanticsRule rule : entry.getValue()) {
-				InterfaceItem ifitem = entry.getKey();
+			for (FTransition rule : entry.getValue()) {
+				InterfaceScope ifitem = entry.getKey();
 				if (rules.containsKey(ifitem)) {
 					if (!rules.get(ifitem).contains(rule)) {
 						rules.get(ifitem).add(rule);
 						added_at_least_one = true;
 					}
 				} else {
-					List<SemanticsRule> tempList = new ArrayList<SemanticsRule>();
+					List<FTransition> tempList = new ArrayList<FTransition>();
 					tempList.add(rule);
 					rules.put(ifitem, tempList);
 					added_at_least_one = true;
@@ -137,46 +140,44 @@ public class ActiveRules {
 	}
 
 	public ActiveRules createCopy() {
-		HashMap<InterfaceItem, List<SemanticsRule>> newRules = new HashMap<InterfaceItem, List<SemanticsRule>>();
-		for (InterfaceItem ifitem : rules.keySet()) {
+		HashMap<InterfaceScope, List<FTransition>> newRules = new HashMap<InterfaceScope, List<FTransition>>();
+		for (InterfaceScope ifitem : rules.keySet()) {
 			newRules.put(ifitem,
-					new ArrayList<SemanticsRule>(rules.get(ifitem)));
+					new ArrayList<FTransition>(rules.get(ifitem)));
 		}
 		return new ActiveRules(newRules);
 	}
 
 	public void buildInitLocalRules(ExpandedActorClass xpAct) {
-		// HashMap<InterfaceItem, EList<SemanticsRule>> locals = new
-		// HashMap<InterfaceItem, EList<SemanticsRule>>();
-		List<InterfaceItem> portList = RoomHelpers.getAllInterfaceItems(xpAct
+		List<InterfaceScope> portList = RoomHelpers.getAllInterfaceItems(xpAct
 				.getActorClass());
-		for (InterfaceItem ifitem : portList) {
+		for (InterfaceScope ifitem : portList) {
 			GeneralProtocolClass gpc = ifitem.getGeneralProtocol();
 			if (gpc instanceof ProtocolClass) {
 				ProtocolClass pc = (ProtocolClass) gpc;
 				if (pc.getSemantics() != null)
-					rules.put(ifitem, new ArrayList<SemanticsRule>(pc
+					rules.put(ifitem, new ArrayList<FTransition>(pc
 							.getSemantics().getRules()));
 			}
 		}
 	}
 
 	public void print() {
-		for (InterfaceItem port : rules.keySet()) {
+		for (InterfaceScope port : rules.keySet()) {
 			System.out.println("      Rules for Port " + port.getName() + ":");
-			for (SemanticsRule rule : rules.get(port)) {
+			for (FTransition rule : rules.get(port)) {
 				printRule(rule, "        ");
 			}
 		}
 	}
 
-	public void printRule(SemanticsRule rule, String indent) {
+	public void printRule(FTransition rule, String indent) {
 		if (rule instanceof InSemanticsRule)
 			System.out.println(indent + "in: " + rule.getMsg().getName());
 		else
 			System.out.println(indent + "out: " + rule.getMsg().getName());
 		// recursion
-		for (SemanticsRule sr : rule.getFollowUps()) {
+		for (FTransition sr : rule.getFollowUps()) {
 			printRule(sr, indent + "  ");
 		}
 	}

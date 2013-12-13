@@ -17,4 +17,5 @@ Import-Package: com.google.inject,
  org.franca.core.franca,
  org.yakindu.component.model,
  org.yakindu.component.model.como,
- org.yakindu.sct.model.sgraph
+ org.yakindu.sct.model.sgraph,
+ org.yakindu.sct.model.stext.stext

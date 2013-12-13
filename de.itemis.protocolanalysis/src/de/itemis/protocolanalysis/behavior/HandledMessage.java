@@ -14,25 +14,26 @@
 package de.itemis.protocolanalysis.behavior;
 
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.etrice.core.room.InterfaceItem;
-import org.eclipse.etrice.core.room.Message;
+import org.yakindu.component.model.como.InterfaceElementMapping;
+//import org.yakindu.sct.model.stext.stext.EventDefinition; //was Message
+import org.yakindu.sct.model.stext.stext.InterfaceScope; //was InterfaceItem
 
 public class HandledMessage {
-	private InterfaceItem ifitem;
-	private Message msg;
+	private InterfaceScope ifitem;
+	private InterfaceElementMapping msg;
 	private EObject origin;
 
-	public HandledMessage(InterfaceItem ifitem, Message msg, EObject origin) {
+	public HandledMessage(InterfaceScope ifitem, InterfaceElementMapping msg, EObject origin) {
 		this.ifitem = ifitem;
 		this.msg = msg;
 		this.origin = origin;
 	}
 
-	public InterfaceItem getIfitem() {
+	public InterfaceScope getIfitem() {
 		return ifitem;
 	}
 
-	public Message getMsg() {
+	public InterfaceElementMapping getMsg() {
 		return msg;
 	}
 
